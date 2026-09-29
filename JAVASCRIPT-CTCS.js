@@ -1,3 +1,4 @@
+
 function RunCTCS(script, canAllowPageEdit) {
   if (canAllowPageEdit === undefined) canAllowPageEdit = true;
 
@@ -22,6 +23,140 @@ function RunCTCS(script, canAllowPageEdit) {
   SysVars.GetHour = now.getHours();
   SysVars.GetMinute = now.getMinutes();
   SysVars.GetSecond = now.getSeconds();
+  SysVars.HELP?? = `
+╔══════════════════════════════════════════════════════════════════╗
+║              CTCS SYSTEM VARIABLES — REFERENCE                               ║
+║              Use with: ?{VarName}?                                           ║
+╚══════════════════════════════════════════════════════════════════╝
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  DATE & TIME
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ?{GetDate}?              Full date as a string (e.g. "Mon Sep 29 2026")
+  ?{GetDateAsString}?      Full date + time string
+  ?{GetTodayDate}?         Day of the month (1–31)
+  ?{GetDay}?               Day of the week as number (0 = Sunday)
+  ?{GetDayName}?           Day name ("Sunday", "Monday", ...)
+  ?{GetYear}?              Current year (e.g. 2026)
+  ?{GetMonth}?             Month as number (1–12)
+  ?{GetMonthName}?         Month name ("January", "February", ...)
+  ?{GetHour}?              Current hour (0–23)
+  ?{GetMinute}?            Current minute (0–59)
+  ?{GetSecond}?            Current second (0–59)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  DEVICE                                                                        
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ?{CurrentDevice}?        "Mobile", "Tablet", or "Desktop"
+  ?{CurrentOS}?            Operating system platform
+  ?{CurrentBrowser}?       "Chrome", "Firefox", "Safari", "Edge"
+  ?{ScreenWidth}?          Screen width in pixels
+  ?{ScreenHeight}?         Screen height in pixels
+  ?{IsTouch}?              "Yes" or "No" — has touch support
+  ?{PixelRatio}?           Device pixel ratio (1, 2, 3...)
+  ?{CPUCores}?             Number of CPU cores
+  ?{DeviceMemory}?         RAM in GB (or "Unknown")
+  ?{MaxTouchPoints}?       Max simultaneous touch points
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  WEBSITE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ?{WebsiteTitle}?         Current page title
+  ?{WebsiteURL}?           Full page URL
+  ?{WebsiteHost}?          Domain name ("example.com")
+  ?{WebsitePath}?          Path portion ("/folder/page")
+  ?{WebsiteProtocol}?      "https:" or "http:"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  DOCUMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ?{DocumentReferrer}?     Where the user came from
+  ?{DocumentEncoding}?     Character set (e.g. "UTF-8")
+  ?{DocumentLastModified}? Last time page was modified
+  ?{DocumentReadyState}?   "loading", "interactive", "complete"
+  ?{DocumentCookiesEnabled}?  "Yes" or "No"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  LOCATION & LANGUAGE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ?{CurrentCountry}?       Country from timezone
+  ?{CurrentTimezone}?      Timezone (e.g. "America/New_York")
+  ?{Language}?             Browser language ("en-US")
+  ?{Languages}?            All preferred languages, comma-separated
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  NETWORK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ?{IsOnline}?             "Yes" or "No"
+  ?{ConnectionType}?       "4g", "3g", "2g", "slow-2g"
+  ?{ConnectionDownlink}?   Download speed in Mbps
+  ?{ConnectionRTT}?        Round-trip time in ms
+  ?{ConnectionSaveData}?   "Yes" if data saver is on
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PREFERENCES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ?{PrefersDark}?          "Yes" if user prefers dark mode
+  ?{PrefersReducedMotion}? "Yes" if user wants less animation
+  ?{CookieEnabled}?        "Yes" or "No"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  BATTERY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ?{BatteryLevel}?         Percentage ("85%") or "loading..."
+  ?{BatteryCharging}?      "Yes" or "No"
+  ?{BatteryChargingTime}?  Seconds until full (or "N/A")
+  ?{BatteryDischargingTime}?  Seconds until empty (or "N/A")
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  META
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ?{Version}?              CTCS version string
+  ?{HELP??}?               Help menu
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  EXAMPLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Print today's date:
+    Type: "PrintText" Value1: "Today is ?{GetDayName}?, ?{GetMonthName}? ?{GetTodayDate}?" endFunc!
+
+  Detect mobile:
+    Type: "If" Value1: "?{CurrentDevice}?" Op: "==" Value2: "Mobile" ${
+      Type: "PrintText" Value1: "You're on a phone!" endFunc!
+    $eif! }
+
+  Check connection:
+    Type: "PrintText" Value1: "Online: ?{IsOnline}? (?{ConnectionType}?)" endFunc!
+
+  Show full URL:
+    Type: "PrintText" Value1: "You are at ?{WebsiteURL}?" endFunc!
+
+  Battery status:
+    Type: "PrintText" Value1: "Battery: ?{BatteryLevel}? charging: ?{BatteryCharging}?" endFunc!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  NOTES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  • All system variables are read-only — you can't change them
+  • Use ?{VarName}? syntax (question marks, not exclamation marks)
+  • If a variable doesn't exist, it renders as the literal text
+    ?{VarName}? and logs an error
+  • Battery values start as "loading..." then update asynchronously
+  • ?{PrefersDark}? and ?{PrefersReducedMotion}? respect the user's
+    operating system settings
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  `;
   let ua = navigator.userAgent;
   SysVars.CurrentDevice = /Mobi|Android/i.test(ua) ? "Mobile" : /Tablet|iPad/i.test(ua) ? "Tablet" : "Desktop";
   SysVars.CurrentOS = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "Unknown";
@@ -573,7 +708,6 @@ case "trimStart": {
   break;
 }
 
-
 case "replaceAll": {
   if (!args.Text) { bug(lineNum, "replaceAll: missing Text"); return; }
   if (!args.WithText) { bug(lineNum, "replaceAll: missing WithText"); return; }
@@ -756,12 +890,41 @@ case "endsWith": {
         document.body.style.cssText = "";
         break;
 
-      case "ClearOutput": {
-        if (!requirePageEdit(lineNum, "ClearOutput")) return;
-        let outEl = document.getElementById("out");
-        if (outEl) outEl.innerHTML = "";
-        break;
-      }
+case "HTTPsGET": {
+  if (!args.URL)     { bug(lineNum, "HTTPsGET: missing URL"); return; }
+  if (!args.Method)  { bug(lineNum, "HTTPsGET: missing Method"); return; }
+  if (!args.StoreIn) { bug(lineNum, "HTTPsGET: missing StoreIn"); return; }
+  let METHOD  = replaceVars(args.Method).toUpperCase();
+  let URL     = replaceVars(args.URL);
+  let STORE   = args.StoreIn;
+  let FORMAT  = args.Format ? replaceVars(args.Format) : "text";
+  let headers = {};
+  if (args.Headers1 !== undefined && args.Headers2 !== undefined) {
+    headers[replaceVars(args.Headers1)] = replaceVars(args.Headers2);
+  }
+  let opts = { method: METHOD, headers: headers };
+  if (METHOD !== "GET" && METHOD !== "HEAD" && args.Body !== undefined) {
+    opts.body = replaceVars(args.Body);
+  }
+  Vars[STORE] = "loading...";
+  Vars["HTTPStatus"] = "pending";
+  fetch(URL, opts)
+    .then(function(res) {
+      Vars["HTTPStatus"] = res.status;
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return FORMAT === "json" ? res.json() : res.text();
+    })
+    .then(function(data) {
+      Vars[STORE] = FORMAT === "json" ? JSON.stringify(data) : String(data);
+      Vars["HTTPStatus"] = "success";
+    })
+    .catch(function(err) {
+      Vars[STORE] = "";
+      Vars["HTTPStatus"] = "error";
+      Vars["HTTPError"]  = err.message;
+    });
+  break;
+}
 
       case "ChangeBodyCSS":
         if (!requirePageEdit(lineNum, "ChangeBodyCSS")) return;

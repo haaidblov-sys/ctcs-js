@@ -6,7 +6,7 @@ function RunCTCS(script, canAllowPageEdit) {
   let Out = "";
   let Bugs = "";
   let Vars = {};
-  let VER = "CTCS 1.2 (Alpha)";
+  let VER = "CTCS 0.2";
   let ErrorCount = 0;
   let RES = 0;
 

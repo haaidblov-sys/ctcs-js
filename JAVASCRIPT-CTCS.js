@@ -8,7 +8,6 @@ function RunCTCS(script, canAllowPageEdit) {
   let VER = "CTCS 0.2";
   let ErrorCount = 0;
   let RES = 0;
-
   let SysVars = {};
   let now = new Date();
   SysVars.GetDate = now.toDateString();
@@ -119,7 +118,7 @@ function RunCTCS(script, canAllowPageEdit) {
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ?{Version}?              CTCS version string
-  ?{HELP??}?               Help menu
+  ?{Help}?               Help menu
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   EXAMPLES

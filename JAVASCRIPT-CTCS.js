@@ -23,7 +23,7 @@ function RunCTCS(script, canAllowPageEdit) {
   SysVars.GetHour = now.getHours();
   SysVars.GetMinute = now.getMinutes();
   SysVars.GetSecond = now.getSeconds();
-  SysVars.HELP?? = `
+  SysVars.Help = `
 ╔══════════════════════════════════════════════════════════════════╗
 ║              CTCS SYSTEM VARIABLES — REFERENCE                               ║
 ║              Use with: ?{VarName}?                                           ║

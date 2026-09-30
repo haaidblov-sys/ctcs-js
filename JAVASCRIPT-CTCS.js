@@ -1,4 +1,3 @@
-
 function RunCTCS(script, canAllowPageEdit) {
   if (canAllowPageEdit === undefined) canAllowPageEdit = true;
 
@@ -204,7 +203,7 @@ function RunCTCS(script, canAllowPageEdit) {
     }).catch(function() {
       SysVars.BatteryLevel = "Not available";
       SysVars.BatteryCharging = "Not available";
-      SysVars.BatteryChargingTime = "Not available";
+      SysVars.BatteryChargingTime NotNot available";
       SysVars.BatteryDischargingTime = "Not available";
     });
   } else {

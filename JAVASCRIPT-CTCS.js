@@ -1,15 +1,17 @@
 
-function RunCTCS(script, canAllowPageEdit) {
-  if (canAllowPageEdit === undefined) canAllowPageEdit = true;
-
+function RunCTCS(script, canAllowPageEdit, canAllowJavaScriptFunc, othersAllowed) {
+  if (canAllowPageEdit === undefined) canAllowPageEdit = false;
+     if (canAllowJavaScriptFunc === undefined) canAllowJavaScriptFunc = false;
+     if (othersAllowed === undefined) othersAllowed = false;
   let Lines = script.split("\n").map(l => l.trim()).filter(l => l && !l.startsWith("//"));
   let Out = "";
   let Bugs = "";
   let Vars = {};
-  let VER = "CTCS 0.3 (Alpha)";
+  let VER = "CTCS 0.4";
   let ErrorCount = 0;
   let RES = 0;
-
+  let AJSF = canAllowJavaScriptFunc;
+  let OA = othersAllowed;
   let SysVars = {};
   let now = new Date();
   SysVars.GetDate = now.toDateString();
@@ -23,7 +25,12 @@ function RunCTCS(script, canAllowPageEdit) {
   SysVars.GetHour = now.getHours();
   SysVars.GetMinute = now.getMinutes();
   SysVars.GetSecond = now.getSeconds();
-  let ua = navigator.userAgent;
+  SysVars.CurrentOutput = Out;
+  SysVars.CurrentErrorCount = ErrorCount;
+  SysVars.CurrentBugs = Bugs;
+  SysVars.HostName = window.location.hostname || "localhost";
+  let ua = navigator.userAgent || "Unknown";
+  SysVars.UserAgent = ua;
   SysVars.CurrentDevice = /Mobi|Android/i.test(ua) ? "Mobile" : /Tablet|iPad/i.test(ua) ? "Tablet" : "Desktop";
   SysVars.CurrentOS = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "Unknown";
   SysVars.CurrentBrowser = ua.includes("Firefox") ? "Firefox" : ua.includes("Edg") ? "Edge" : ua.includes("Chrome") ? "Chrome" : ua.includes("Safari") ? "Safari" : "Unknown";
@@ -185,7 +192,8 @@ function RunCTCS(script, canAllowPageEdit) {
         if (args.Value1 === undefined) { bug(lineNum, "Title: missing Value1"); return; }
         document.title = replaceVars(args.Value1);
         break;
-
+        
+        
       case "PrintText":
         if (args.Value1 === undefined) { bug(lineNum, "PrintText: missing Value1"); return; }
         Out += replaceVars(args.Value1) + "<br>";
@@ -213,10 +221,6 @@ case "Split": {
         console.log(replaceVars(args.Value1));
         break;
       
-      case "PlayAudioByURL":
-        if (args.URL === undefined) { bug(lineNum, "PlayAudioByURL: missing URL"); return; }
-        replaceVars(args.URL).play();
-        break;
         case "GetBodyCSS": {
   if (!args.StoreIn) { bug(lineNum, "GetBodyCSS: missing StoreIn"); return; }
   Vars[args.StoreIn] = document.body.style.cssText;
@@ -231,6 +235,50 @@ case "Split": {
         Vars[args.Name] = el.value;
         break;
       }
+      
+      case "RegexTest": {
+  if (!args.Text) { bug(lineNum, "RegexTest: missing Text"); return; }
+  if (!args.Pattern) { bug(lineNum, "RegexTest: missing Pattern"); return; }
+  if (!args.StoreIn) { bug(lineNum, "RegexTest: missing StoreIn"); return; }
+  try {
+    let flags = args.Flags ? replaceVars(args.Flags) : "";
+    let re = new RegExp(replaceVars(args.Pattern), flags);
+    Vars[args.StoreIn] = re.test(replaceVars(args.Text)) ? "true" : "false";
+  } catch (e) {
+    bug(lineNum, "RegexTest: invalid pattern — " + e.message);
+  }
+  break;
+}
+
+case "RegexMatch": {
+  if (!args.Text) { bug(lineNum, "RegexMatch: missing Text"); return; }
+  if (!args.Pattern) { bug(lineNum, "RegexMatch: missing Pattern"); return; }
+  if (!args.StoreIn) { bug(lineNum, "RegexMatch: missing StoreIn"); return; }
+  try {
+    let flags = args.Flags ? replaceVars(args.Flags) : "";
+    let re = new RegExp(replaceVars(args.Pattern), flags);
+    let matches = replaceVars(args.Text).match(re);
+    Vars[args.StoreIn] = matches ? matches.join(", ") : "";
+  } catch (e) {
+    bug(lineNum, "RegexMatch: invalid pattern — " + e.message);
+  }
+  break;
+}
+
+case "RegexReplace": {
+  if (!args.Text) { bug(lineNum, "RegexReplace: missing Text"); return; }
+  if (!args.Pattern) { bug(lineNum, "RegexReplace: missing Pattern"); return; }
+  if (!args.WithText) { bug(lineNum, "RegexReplace: missing WithText"); return; }
+  if (!args.StoreIn) { bug(lineNum, "RegexReplace: missing StoreIn"); return; }
+  try {
+    let flags = args.Flags ? replaceVars(args.Flags) : "";
+    let re = new RegExp(replaceVars(args.Pattern), flags);
+    Vars[args.StoreIn] = replaceVars(args.Text).replace(re, replaceVars(args.WithText));
+  } catch (e) {
+    bug(lineNum, "RegexReplace: invalid pattern — " + e.message);
+  }
+  break;
+}
 
       case "SetInput": {
         if (!requirePageEdit(lineNum, "SetInput")) return;
@@ -528,6 +576,18 @@ case "PadStart": {
         Vars[args.Name] = result;
         break;
       }
+      
+     case "RandomCharacters": {
+        if (!args.Name) { bug(lineNum, "RandomLetters: missing Name"); return; }
+        let count = strictNumber(args.Length, lineNum, "RandomLetters.Length");
+        if (count === null) return;
+        if (count < 1 || count > 100000) { bug(lineNum, "RandomLetters: bad Length"); return; }
+        let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890#=£*%&'-:+;(!)?/.,_~¥©<|$®•¢™√^℅π°[÷=]×{±¶}✓∆.>";
+        let result = "";
+        for (let i = 0; i < count; i++) result += letters[Math.floor(Math.random() * letters.length)];
+        Vars[args.Name] = result;
+        break;
+      }
 
       case "RandomLettersChoose": {
         if (!args.Name || args.From === undefined) { bug(lineNum, "RandomLettersChoose: missing args"); return; }
@@ -757,6 +817,7 @@ case "endsWith": {
         break;
 
 case "HTTPsGET": {
+    if(!OA) return;
   if (!args.URL)     { bug(lineNum, "HTTPsGET: missing URL"); return; }
   if (!args.Method)  { bug(lineNum, "HTTPsGET: missing Method"); return; }
   if (!args.StoreIn) { bug(lineNum, "HTTPsGET: missing StoreIn"); return; }
@@ -865,6 +926,7 @@ case "HTTPsGET": {
   break;
 }
      case "JSmath": {
+         if(!AJSF) return;
   if (args.JSinput === undefined) { bug(lineNum, "JSmath: missing JSinput"); return; }
   if (args.Mode === undefined) { bug(lineNum, "JSmath: missing Mode"); return; }
   if (args.Name === undefined) { bug(lineNum, "JSmath: missing Name"); return; }
@@ -950,6 +1012,7 @@ case "OnElement3DTouch":
   }
 
   function runFetchThen(L, body, lineNum) {
+      if(!OA) return;
     if (!requirePageEdit(lineNum, "FetchThen")) return;
     let urlM = L.match(/URL:\s*"([^"]+)"/);
     let storeM = L.match(/StoreIn:\s*"([^"]+)"/);

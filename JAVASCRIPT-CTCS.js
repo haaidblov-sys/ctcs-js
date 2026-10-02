@@ -125,12 +125,7 @@ function RunCTCS(script, canAllowPageEdit) {
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   Print today's date:
-    Type: "PrintText" Value1: "Today is ?{GetDayName}?, ?{GetMonthName}? ?{GetTodayDate}?" endFunc!
-
-  Detect mobile:
-    Type: "If" Value1: "?{CurrentDevice}?" Op: "==" Value2: "Mobile" ${
-      Type: "PrintText" Value1: "You're on a phone!" endFunc!
-    $eif! }
+    Type: "PrintText" Value1: "Today is ?{GetDayName}?, ?{GetMonthName}? ?{GetTodayDate}?" endFunc
 
   Check connection:
     Type: "PrintText" Value1: "Online: ?{IsOnline}? (?{ConnectionType}?)" endFunc!

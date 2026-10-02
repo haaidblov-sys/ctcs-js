@@ -1,3 +1,4 @@
+
 function RunCTCS(script, canAllowPageEdit) {
   if (canAllowPageEdit === undefined) canAllowPageEdit = true;
 
@@ -5,9 +6,10 @@ function RunCTCS(script, canAllowPageEdit) {
   let Out = "";
   let Bugs = "";
   let Vars = {};
-  let VER = "CTCS 0.2";
+  let VER = "CTCS 1.2 (Alpha)";
   let ErrorCount = 0;
   let RES = 0;
+
   let SysVars = {};
   let now = new Date();
   SysVars.GetDate = now.toDateString();
@@ -23,8 +25,8 @@ function RunCTCS(script, canAllowPageEdit) {
   SysVars.GetSecond = now.getSeconds();
   SysVars.Help = `
 ╔══════════════════════════════════════════════════════════════════╗
-║              CTCS SYSTEM VARIABLES — REFERENCE                               ║
-║              Use with: ?{VarName}?                                           ║
+              CTCS SYSTEM VARIABLES — REFERENCE                                  
+              Use with: ?{VarName}?                                                                                                                                              
 ╚══════════════════════════════════════════════════════════════════╝
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   DATE & TIME
@@ -121,26 +123,10 @@ function RunCTCS(script, canAllowPageEdit) {
   ?{Help}?               Help menu
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  EXAMPLES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  Print today's date:
-    Type: "PrintText" Value1: "Today is ?{GetDayName}?, ?{GetMonthName}? ?{GetTodayDate}?" endFunc
-
-  Check connection:
-    Type: "PrintText" Value1: "Online: ?{IsOnline}? (?{ConnectionType}?)" endFunc!
-
-  Show full URL:
-    Type: "PrintText" Value1: "You are at ?{WebsiteURL}?" endFunc!
-
-  Battery status:
-    Type: "PrintText" Value1: "Battery: ?{BatteryLevel}? charging: ?{BatteryCharging}?" endFunc!
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   NOTES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  • All system variables are read-only — you can't change them
+  • All system variables are read-only — you can't change  them easily
   • Use ?{VarName}? syntax (question marks, not exclamation marks)
   • If a variable doesn't exist, it renders as the literal text
     ?{VarName}? and logs an error
@@ -197,7 +183,7 @@ function RunCTCS(script, canAllowPageEdit) {
     }).catch(function() {
       SysVars.BatteryLevel = "Not available";
       SysVars.BatteryCharging = "Not available";
-      SysVars.BatteryChargingTime NotNot available";
+      SysVars.BatteryChargingTime = "Not available";
       SysVars.BatteryDischargingTime = "Not available";
     });
   } else {

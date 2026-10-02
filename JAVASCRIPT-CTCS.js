@@ -7,7 +7,7 @@ function RunCTCS(script, canAllowPageEdit, canAllowJavaScriptFunc, othersAllowed
   let Out = "";
   let Bugs = "";
   let Vars = {};
-  let VER = "CTCS 0.4";
+  let VER = "CTCS 0.4.2";
   let ErrorCount = 0;
   let RES = 0;
   let AJSF = canAllowJavaScriptFunc;

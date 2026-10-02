@@ -129,7 +129,7 @@ function RunCTCS(script, canAllowPageEdit, canAllowJavaScriptFunc, othersAllowed
 
   function strictNumber(value, lineNum, context) {
     if (value === undefined || value === null || value === "") { bug(lineNum, context + ": missing numeric value"); return null; }
-    let n = Number(value);
+    let n = Number(value); }
     if (isNaN(n)) { bug(lineNum, context + ": '" + value + "' is not a number"); return null; }
     return n;
   }

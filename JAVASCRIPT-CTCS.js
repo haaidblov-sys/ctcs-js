@@ -1,4 +1,5 @@
 
+
 function RunCTCS(script, canAllowPageEdit, canAllowJavaScriptFunc, othersAllowed) {
   if (canAllowPageEdit === undefined) canAllowPageEdit = false;
      if (canAllowJavaScriptFunc === undefined) canAllowJavaScriptFunc = false;
@@ -7,12 +8,14 @@ function RunCTCS(script, canAllowPageEdit, canAllowJavaScriptFunc, othersAllowed
   let Out = "";
   let Bugs = "";
   let Vars = {};
-  let VER = "CTCS 0.4.2";
+  let VER = "CTCS 0.5.1";
   let ErrorCount = 0;
   let RES = 0;
   let AJSF = canAllowJavaScriptFunc;
   let OA = othersAllowed;
   let SysVars = {};
+  let returnValue = null;
+let returnSignal = false;
   let now = new Date();
   SysVars.GetDate = now.toDateString();
   SysVars.GetDateAsString = now.toString();
@@ -25,9 +28,6 @@ function RunCTCS(script, canAllowPageEdit, canAllowJavaScriptFunc, othersAllowed
   SysVars.GetHour = now.getHours();
   SysVars.GetMinute = now.getMinutes();
   SysVars.GetSecond = now.getSeconds();
-  SysVars.CurrentOutput = Out;
-  SysVars.CurrentErrorCount = ErrorCount;
-  SysVars.CurrentBugs = Bugs;
   SysVars.HostName = window.location.hostname || "localhost";
   let ua = navigator.userAgent || "Unknown";
   SysVars.UserAgent = ua;
@@ -107,7 +107,7 @@ function RunCTCS(script, canAllowPageEdit, canAllowJavaScriptFunc, othersAllowed
 
   function bug(line, msg) {
     ErrorCount++;
-    Bugs += "❌ Line " + line + ": " + msg + "<br>";
+    Bugs += "Line " + line + ": " + msg + "<br>";
   }
 
   function requirePageEdit(lineNum, command) {
@@ -170,7 +170,7 @@ function RunCTCS(script, canAllowPageEdit, canAllowJavaScriptFunc, othersAllowed
     }
     Functions[name] = { params: params, body: body };
   }
-  
+
   function parseCommand(L, lineNum) {
     if (!L.startsWith("Type:")) { bug(lineNum, 'Line does not start with "Type:"'); return; }
     let typeM = L.match(/Type:\s*"([^"]+)"/);
@@ -192,13 +192,16 @@ function RunCTCS(script, canAllowPageEdit, canAllowJavaScriptFunc, othersAllowed
         if (args.Value1 === undefined) { bug(lineNum, "Title: missing Value1"); return; }
         document.title = replaceVars(args.Value1);
         break;
-        
-        
-      case "PrintText":
-        if (args.Value1 === undefined) { bug(lineNum, "PrintText: missing Value1"); return; }
-        Out += replaceVars(args.Value1) + "<br>";
-        break;
 
+case "PrintText":
+  if (args.Value1 === undefined) { bug(lineNum, "PrintText: missing Value1"); return; }
+  let safe = replaceVars(args.Value1)
+  Out += safe;
+  break;
+
+ case "PrintNewLine":
+Out += "<br>";
+break;
       case "PrintLine":
         Out += "------------<br>";
         break;
@@ -220,7 +223,7 @@ case "Split": {
         if (args.Value1 === undefined) { bug(lineNum, "ConsoleLog: missing Value1"); return; }
         console.log(replaceVars(args.Value1));
         break;
-      
+
         case "GetBodyCSS": {
   if (!args.StoreIn) { bug(lineNum, "GetBodyCSS: missing StoreIn"); return; }
   Vars[args.StoreIn] = document.body.style.cssText;
@@ -235,7 +238,7 @@ case "Split": {
         Vars[args.Name] = el.value;
         break;
       }
-      
+
       case "RegexTest": {
   if (!args.Text) { bug(lineNum, "RegexTest: missing Text"); return; }
   if (!args.Pattern) { bug(lineNum, "RegexTest: missing Pattern"); return; }
@@ -335,6 +338,13 @@ case "CharAt": {
   break;
 }
 
+case "Return": {
+  if (args.Value === undefined) { bug(lineNum, "Return: missing Value"); return; }
+  returnValue = replaceVars(args.Value);
+  returnSignal = true;
+  break;
+}
+
 case "IndexOf": {
   if (!args.Name || !args.Search) { bug(lineNum, "IndexOf: missing args"); return; }
   if (!args.StoreIn) { bug(lineNum, "IndexOf: missing StoreIn"); return; }
@@ -387,7 +397,7 @@ case "PadStart": {
         el.scrollTop = 0;
         break;
       }
-       
+
        case "ScrollBottom": {
         if (!requirePageEdit(lineNum, "ScrollBottom")) return;
         if (args.Target === undefined) { bug(lineNum, "ScrollBottom: missing Target"); return; }
@@ -576,7 +586,7 @@ case "PadStart": {
         Vars[args.Name] = result;
         break;
       }
-      
+
      case "RandomCharacters": {
         if (!args.Name) { bug(lineNum, "RandomLetters: missing Name"); return; }
         let count = strictNumber(args.Length, lineNum, "RandomLetters.Length");
@@ -880,7 +890,36 @@ case "HTTPsGET": {
         });
         break;
       }
-
+       case "CallFunc": {
+  if (!args.Name) { bug(lineNum, "CallFunc: missing Name"); return; }
+  if (!Functions.hasOwnProperty(args.Name)) {
+    bug(lineNum, "CallFunc: '" + args.Name + "' not defined");
+    return;
+  }
+  let fn = Functions[args.Name];
+  let argList = args.Args
+    ? replaceVars(args.Args).split(",").map(s => s.trim())
+    : [];
+  if (argList.length !== fn.params.length) {
+    bug(lineNum, "CallFunc: '" + args.Name + "' expects " + fn.params.length + " args, got " + argList.length);
+    return;
+  }
+  let saved = {};
+  for (let i = 0; i < fn.params.length; i++) {
+    let param = fn.params[i];
+    saved[param] = Vars.hasOwnProperty(param) ? Vars[param] : undefined;
+    Vars[param] = argList[i];
+  }
+  runBlock(fn.body, lineNum);
+  for (let param of fn.params) {
+    if (saved[param] === undefined) delete Vars[param];
+    else Vars[param] = saved[param];
+  }
+  if (args.StoreIn) {
+    Vars[args.StoreIn] = result !== null ? result : "";
+  }
+  break;
+}
       case "CreateElement": {
         if (!requirePageEdit(lineNum, "CreateElement")) return;
         if (!args.Tag) { bug(lineNum, "CreateElement: missing Tag"); return; }
@@ -904,7 +943,7 @@ case "HTTPsGET": {
         els.forEach(function(el) { el.remove(); });
         break;
       }
-        
+
       case "SetText": {
         if (!requirePageEdit(lineNum, "SetText")) return;
         if (!args.Target || args.Text === undefined) { bug(lineNum, "SetText: missing args"); return; }
@@ -961,7 +1000,7 @@ case "HTTPsGET": {
     bug(lineNum, "JSmath: " + e.message);
     return;
   }
-  
+
   if (typeof result !== "number" || isNaN(result)) {
     bug(lineNum, "JSmath: result is not a number");
     return;
@@ -1049,12 +1088,12 @@ function runOnElement3DTouch(L, body, lineNum) {
   if (!targetM) { bug(lineNum, "OnElement3DTouch: missing Target"); return; }
   let eventM = L.match(/Event:\s*"([^"]+)"/);
   let event = eventM ? eventM[1] : "hover";
-  
+
   let elements = document.querySelectorAll(replaceVars(targetM[1]));
   if (elements.length === 0) { bug(lineNum, "OnElement3DTouch: no match"); return; }
-  
+
   let eventName = event === "click" ? "click" : event === "leave" ? "mouseleave" : "mouseenter";
-  
+
   elements.forEach(function(el) {
     el.addEventListener(eventName, function() {
       let oldOut = Out, oldBugs = Bugs;
@@ -1120,7 +1159,7 @@ function runOnElement3DTouch(L, body, lineNum) {
       el.addEventListener("touchend", stopHold);
     });
   }
-
+  
   function runOnButtonRelease(L, body, lineNum) {
     let targetM = L.match(/Target:\s*"([^"]+)"/);
     if (!targetM) { bug(lineNum, "OnButtonRelease: missing Target"); return; }
@@ -1203,6 +1242,11 @@ function runOnElement3DTouch(L, body, lineNum) {
 
   function runBlock(lines, lineNum) {
     for (let k = 0; k < lines.length; k++) {
+    	  SysVars.CurrentOutput = Out;
+  SysVars.CurrentErrorCount = ErrorCount;
+  SysVars.CurrentBugs = Bugs;
+  SysVars.CurrentHTML = document.body.innerHTML;
+  SysVars.CurrentBodyCSS = document.body.style.cssText;
       let L = lines[k];
 if (L.includes('Type: "OnElement3DTouch"')) {
   let endIdx = findBlockEnd(lines, k);
@@ -1331,25 +1375,25 @@ if (L.includes('Type: "OnElement3DTouch"')) {
       runLoop(L, Lines.slice(i + 1, endIdx), i + 1); i = endIdx; continue;
     }
 
-    if (L.startsWith("Type:")) {
-      parseCommand(L, i + 1);
-    } else if (L.trim() !== "") {
-      bug(i + 1, 'Not a command');
-    }
-  }
+  if (L.startsWith("Type:")) {
+  parseCommand(L, i + 1);
+  if (returnSignal) return;
+} else if (L.trim() !== "") {
+  bug(i + 1, 'Not a command');
+}
 
   Out = Out.replaceAll("/#VarS#/", "!{");
   Out = Out.replaceAll("/#VarE#/", "}!");
   Out = Out.replaceAll("/#SysS#/", "?{");
   Out = Out.replaceAll("/#SysE#/", "}?");
-
-  let status = ErrorCount === 0 ? "Ran" : ErrorCount + " error(s)";
+  let stats = ErrorCount === 0 ? "Ran" : ErrorCount + " error(s)";
 
   return {
-    output: Bugs + Out + "<br>-----------<br>" + status + "<br>" + VER,
+    output: Bugs + Out + "<br>-----------<br>" + stats + "<br>" + VER,
     raw: Out,
     bugInfo: Bugs,
     version: VER,
-    errors: ErrorCount
+    errors: ErrorCount,
+    status: stats
   };
 }

@@ -81,6 +81,7 @@ let returnSignal = false;
       SysVars.BatteryDischargingTime = "Not available";
     });
   } else {
+
     SysVars.BatteryLevel = "Not supported";
     SysVars.BatteryCharging = "Not supported";
     SysVars.BatteryChargingTime = "Not supported";

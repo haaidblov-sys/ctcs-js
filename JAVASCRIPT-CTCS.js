@@ -890,7 +890,7 @@ case "HTTPsGET": {
         });
         break;
       }
-       case "CallFunc": {
+      case "CallFunc": {
   if (!args.Name) { bug(lineNum, "CallFunc: missing Name"); return; }
   if (!Functions.hasOwnProperty(args.Name)) {
     bug(lineNum, "CallFunc: '" + args.Name + "' not defined");
@@ -910,7 +910,16 @@ case "HTTPsGET": {
     saved[param] = Vars.hasOwnProperty(param) ? Vars[param] : undefined;
     Vars[param] = argList[i];
   }
+  
+  returnValue = null;           
+  returnSignal = false;        
+  
   runBlock(fn.body, lineNum);
+  
+  let result = returnValue;     
+  returnSignal = false;         
+  returnValue = null;           
+  
   for (let param of fn.params) {
     if (saved[param] === undefined) delete Vars[param];
     else Vars[param] = saved[param];
@@ -919,7 +928,7 @@ case "HTTPsGET": {
     Vars[args.StoreIn] = result !== null ? result : "";
   }
   break;
-}
+} 
       case "CreateElement": {
         if (!requirePageEdit(lineNum, "CreateElement")) return;
         if (!args.Tag) { bug(lineNum, "CreateElement: missing Tag"); return; }
@@ -1179,15 +1188,17 @@ function runOnElement3DTouch(L, body, lineNum) {
     let depth = 0;
     for (let j = startIdx + 1; j < lines.length; j++) {
       let t = lines[j];
-      if (t.includes('Type: "If"') || t.includes('Type: "Loop"') || t.includes('Type: "OnClick"') ||
-          t.includes('Type: "FetchThen"') || t.includes('Type: "Define"') ||
-          t.includes('Type: "OnButtonHold"') || t.includes('Type: "OnButtonRelease"')) depth++;
-      if (t.includes("$eif!") || t.includes("$endLoop!") || t.includes("$endOnClick!") ||
-          t.includes("$endFetchThen!") || t.includes("$endDefine!") ||
-          t.includes("$endHold!") || t.includes("$endRelease!")) {
-        if (depth === 0) return j;
-        depth--;
-      }
+    if (t.includes('Type: "If"') || t.includes('Type: "Loop"') || t.includes('Type: "OnClick"') ||
+    t.includes('Type: "FetchThen"') || t.includes('Type: "Define"') ||
+    t.includes('Type: "OnButtonHold"') || t.includes('Type: "OnButtonRelease"') ||
+    t.includes('Type: "OnElement3DTouch"')) depth++;   // ← add this
+if (t.includes("$eif!") || t.includes("$endLoop!") || t.includes("$endOnClick!") ||
+    t.includes("$endFetchThen!") || t.includes("$endDefine!") ||
+    t.includes("$endHold!") || t.includes("$endRelease!") ||
+    t.includes("$endTouch!")) {                          // ← and this
+  if (depth === 0) return j;
+  depth--;
+}
     }
     return -1;
   }
@@ -1306,6 +1317,7 @@ if (L.includes('Type: "OnElement3DTouch"')) {
       if (L.includes("$endDefine!")) continue;
       if (L.includes("$endHold!")) continue;
       if (L.includes("$endRelease!")) continue;
+     if (L.includes("$endTouch!")) continue;
       if (L.includes("$Else")) continue;
 
       if (L.startsWith("Type:")) parseCommand(L, lineNum);
@@ -1381,6 +1393,7 @@ if (L.includes('Type: "OnElement3DTouch"')) {
 } else if (L.trim() !== "") {
   bug(i + 1, 'Not a command');
 }
+}
 const verbatimBlocks = [];
 Out = Out.replace(/#L\/([\s\S]*?)\/#E\//g, (m, content) => {
   const idx = verbatimBlocks.length;
@@ -1404,5 +1417,4 @@ Out = Out.replace(/#L\/([\s\S]*?)\/#E\//g, (m, content) => {
     errors: ErrorCount,
     status: stats
   };
-}
 }

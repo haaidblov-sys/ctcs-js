@@ -8,7 +8,7 @@ function RunCTCS(script, canAllowPageEdit, canAllowJavaScriptFunc, othersAllowed
   let Out = "";
   let Bugs = "";
   let Vars = {};
-  let VER = "CTCS 0.5.1";
+  let VER = "CTCS 0.6.0";
   let ErrorCount = 0;
   let RES = 0;
   let AJSF = canAllowJavaScriptFunc;
@@ -116,16 +116,16 @@ let returnSignal = false;
   }
 
   function replaceVars(s) {
-    s = s.replace(/!\{(\w+)\}!/g, (m, n) => {
-      if (!Vars.hasOwnProperty(n)) { bug(0, "Unknown variable: !{" + n + "}!"); return "!{" + n + "}?"; }
-      return Vars[n];
-    });
-    s = s.replace(/\?\{(\w+)\}\?/g, (m, n) => {
-      if (!SysVars.hasOwnProperty(n)) { bug(0, "Unknown system variable: ?{" + n + "}?"); return "?{" + n + "}?"; }
-      return SysVars[n];
-    });
-    return s;
-  }
+  s = s.replace(/!\{(\w+)\}!/g, (m, n) => {
+    if (!Vars.hasOwnProperty(n)) return "!{" + n + "}!";
+    return Vars[n];
+  });
+  s = s.replace(/\?\{(\w+)\}\?/g, (m, n) => {
+    if (!SysVars.hasOwnProperty(n)) { bug(0, "Unknown system variable: ?{" + n + "}?"); return "?{" + n + "}?"; }
+    return SysVars[n];
+  });
+  return s;
+}
 
   function strictNumber(value, lineNum, context) {
     if (value === undefined || value === null || value === "") { bug(lineNum, context + ": missing numeric value"); return null; }
@@ -1381,11 +1381,19 @@ if (L.includes('Type: "OnElement3DTouch"')) {
 } else if (L.trim() !== "") {
   bug(i + 1, 'Not a command');
 }
-
+const verbatimBlocks = [];
+Out = Out.replace(/#L\/([\s\S]*?)\/#E\//g, (m, content) => {
+  const idx = verbatimBlocks.length;
+  verbatimBlocks.push(content);
+  return "\u0000V" + idx + "\u0000";
+});
+  Out = replaceVars(Out); // last replace
   Out = Out.replaceAll("/#VarS#/", "!{");
   Out = Out.replaceAll("/#VarE#/", "}!");
   Out = Out.replaceAll("/#SysS#/", "?{");
   Out = Out.replaceAll("/#SysE#/", "}?");
+  Out = Out.replace(/\u0000V(\d+)\u0000/g, (m, i) => verbatimBlocks[Number(i)]);
+
   let stats = ErrorCount === 0 ? "Ran" : ErrorCount + " error(s)";
 
   return {
@@ -1396,4 +1404,5 @@ if (L.includes('Type: "OnElement3DTouch"')) {
     errors: ErrorCount,
     status: stats
   };
+}
 }

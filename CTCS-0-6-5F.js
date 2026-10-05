@@ -8,7 +8,7 @@ function RunCTCS(script, canAllowPageEdit, canAllowJavaScriptFunc, othersAllowed
   let Out = "";
   let Bugs = "";
   let Vars = {};
-  let VER = "CTCS 0.6.5 fix 1";
+  let VER = "CTCS 0.6.5 fix 2";
   let ErrorCount = 0;
   let RES = 0;
   let AJSF = canAllowJavaScriptFunc;
@@ -195,11 +195,7 @@ let returnSignal = false;
         document.title = replaceVars(args.Value1);
         break;
 
-case "PrintText":
-  if (args.Value1 === undefined) { bug(lineNum, "PrintText: missing Value1"); return; }
-  let safe = replaceVars(args.Value1)
-  Out += safe;
-  break;
+
  case "PrintText": {
   if (args.Value1 === undefined) { bug(lineNum, "PrintText: missing Value1"); return; }
   const localVerbatim = [];
@@ -508,7 +504,7 @@ case "PadStart": {
        for (let LOPAT = 0; LOPAT < Times; LOPAT++) {
            RESATx += replaceAll("!(LOOP_AT)?", LOPAT);
        }
-  Vars[args.StoreIn] = replaceVars(args.Text);
+  Vars[args.StoreIn] = replaceVar(RESATx);
   }
        
        

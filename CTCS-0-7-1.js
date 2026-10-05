@@ -1454,7 +1454,7 @@ if (L.includes('Type: "OnElement3DTouch"')) {
         runOnClick(L, lines.slice(k + 1, endIdx), lineNum); k = endIdx; continue;
       }
       if (L.includes('Type: "If"')) {
-  let endIdx = findBlockEnd(Lines, i);
+  let endIdx = findBlockEnd(Lines, k);
   if (endIdx === -1) { bug(i + 1, "If: missing end"); break; }
   let branches = parseIfBranches(Lines, i, endIdx);
   for (let b = 0; b < branches.length; b++) {

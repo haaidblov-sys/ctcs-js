@@ -8,7 +8,7 @@ function RunCTCS(script, canAllowPageEdit, canAllowJavaScriptFunc, othersAllowed
   let Out = "";
   let Bugs = "";
   let Vars = {};
-  let VER = "CTCS 0.6.2";
+  let VER = "CTCS 0.6.0";
   let ErrorCount = 0;
   let RES = 0;
   let AJSF = canAllowJavaScriptFunc;
@@ -813,18 +813,22 @@ case "endsWith": {
         Vars[args.StoreIn] = Vars[args.Name].join(args.Separator || ", ");
         break;
 
-      case "MakeVar":
-        if (!args.Name || args.Value === undefined) { bug(lineNum, "MakeVar: missing args"); return; }
-        if (Vars.hasOwnProperty(args.Name)) { bug(lineNum, "MakeVar: exists"); return; }
-        Vars[args.Name] = isNaN(Number(args.Value)) ? args.Value : Number(args.Value);
-        break;
+        case "MakeVar": {
+  if (!args.Name || args.Value === undefined) { bug(lineNum, "MakeVar: missing args"); return; }
+  if (Vars.hasOwnProperty(args.Name)) { bug(lineNum, "MakeVar: exists"); return; }
+  let makeVal = replaceVars(args.Value);
+  Vars[args.Name] = isNaN(Number(makeVal)) ? makeVal : Number(makeVal);
+  break;
+}
 
-      case "Set":
-        if (!args.Name || args.Value === undefined) { bug(lineNum, "Set: missing args"); return; }
-        if (!Vars.hasOwnProperty(args.Name)) { bug(lineNum, "Set: not found"); return; }
-        Vars[args.Name] = isNaN(Number(args.Value)) ? args.Value : Number(args.Value);
-        break;
-
+case "Set": {
+  if (!args.Name || args.Value === undefined) { bug(lineNum, "Set: missing args"); return; }
+  if (!Vars.hasOwnProperty(args.Name)) { bug(lineNum, "Set: not found"); return; }
+  let setVal = replaceVars(args.Value);
+  Vars[args.Name] = isNaN(Number(setVal)) ? setVal : Number(setVal);
+  break;
+}
+        
       case "Mov":
         if (!args.Name || args.Value === undefined) { bug(lineNum, "Mov: missing args"); return; }
         Vars[args.Name] = isNaN(Number(args.Value)) ? args.Value : Number(args.Value);

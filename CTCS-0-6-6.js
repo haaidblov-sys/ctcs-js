@@ -1142,16 +1142,7 @@ case "HTTPsGET": {
         parent.insertAdjacentHTML("beforeend", replaceVars(args.HTML));
         break;
       }
-
-      case "OnClick":
-      case "OnButtonHold":
-      case "OnButtonRelease":
-      case "FetchThen":
-      case "Define":
-        break;
-case "OnElement3DTouch":
-  break;
-  case "__USE__": {
+case "__USE__": {
   if (!canAllowLibraries) {
     return;
   }
@@ -1225,7 +1216,17 @@ case "OnElement3DTouch":
          (ns ? " as '" + ns + "'" : "") + "</div>";
   break;
 }
-      default:
+
+    
+      case "OnClick":
+      case "OnButtonHold":
+      case "OnButtonRelease":
+      case "FetchThen":
+      case "Define":
+        break;
+case "OnElement3DTouch":
+  break;
+        default:
         bug(lineNum, 'Unknown command: "' + type + '"');
     }
   }

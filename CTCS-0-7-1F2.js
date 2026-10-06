@@ -94,7 +94,6 @@ let returnSignal = false;
 
   Vars["FetchStatus"] = "idle";
   Vars["FetchError"] = "";
-
   let Functions = {};
    let LoadedLibs = {};
 let LibStack = [];

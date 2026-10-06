@@ -648,14 +648,14 @@ case "PadStart": {
       }
 
       case "RandomInt": {
-        if (!args.Name) { bug(lineNum, "RandomInt: missing Name"); return; }
-        let min = strictNumber(args.Min, lineNum, "RandomInt.Min");
-        let max = strictNumber(args.Max, lineNum, "RandomInt.Max");
-        if (min === null || max === null) return;
-        if (min > max) { bug(lineNum, "RandomInt: Min > Max"); return; }
-        Vars[args.Name] = Math.floor(Math.random() * (max - min + 1)) + min;
-        break;
-      }
+  if (!args.Name) { bug(lineNum, "RandomInt: missing Name"); return; }
+  let min = strictNumber(replaceVars(String(args.Min)), lineNum, "RandomInt.Min");
+  let max = strictNumber(replaceVars(String(args.Max)), lineNum, "RandomInt.Max");
+  if (min === null || max === null) return;
+  if (min > max) { bug(lineNum, "RandomInt: Min > Max"); return; }
+  Vars[args.Name] = Math.floor(Math.random() * (max - min + 1)) + min;
+  break;
+}
 
       case "RandomLetters": {
         if (!args.Name) { bug(lineNum, "RandomLetters: missing Name"); return; }
